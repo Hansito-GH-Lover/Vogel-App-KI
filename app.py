@@ -260,16 +260,18 @@ if uploaded_file:
                 confidence = float(prediction[0][i])
                 results.append((label, confidence))
 
-            # Bird check – Vogel-Keyword in Top-5 reicht, Konfidenz-Schwelle nur für Anzeige
-            found_bird = False
-            best_label = results[0][0]
-            best_conf = results[0][1]
-            for label, confidence in results:
-                if any(word in label.lower() for word in bird_keywords):
-                    found_bird = True
-                    best_label = label
-                    best_conf = confidence
-                    break
+            # Bird check – Vogel mit höchster Konfidenz aus Top-5
+            bird_results = [
+                (label, confidence) for label, confidence in results
+                if any(word in label.lower() for word in bird_keywords)
+            ]
+            if bird_results:
+                found_bird = True
+                best_label, best_conf = max(bird_results, key=lambda x: x[1])
+            else:
+                found_bird = False
+                best_label = results[0][0]
+                best_conf = results[0][1]
 
             # Result card
             if found_bird:
